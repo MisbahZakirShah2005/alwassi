@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Wakeel - Islamic Wasiyat Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #059669 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .urdu-text {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .chatbox-container {
+            width: 100%;
+            max-width: 900px;
+            height: 80vh;
+            max-height: 700px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chatbox-header {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .header-text h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .language-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .language-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(5, 150, 105, 0.5);
+            border-radius: 3px;
+        }
+
+        .message {
+            max-width: 80%;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message-content {
+            padding: 15px 20px;
+            border-radius: 15px;
+            line-height: 1.5;
+            font-weight: 400;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.bot .message-content {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+            max-width: 80%;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-question {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quick-question:hover {
+            background: rgba(5, 150, 105, 0.3);
+            border-color: #059669;
+            transform: translateY(-2px);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            resize: none;
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .chat-input:focus {
+            border-color: #059669;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+        }
+
+        .send-button {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .content-english, .content-urdu {
+            display: block;
+        }
+
+        .lang-ur .content-english {
+            display: none;
+        }
+
+        .lang-ur .content-urdu {
+            display: block;
+        }
+
+        .lang-en .content-urdu {
+            display: none;
+        }
+
+        .lang-en .content-english {
+            display: block;
+        }
+
+        .islamic-footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(5, 150, 105, 0.1);
+        }
+
+        .islamic-date {
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 5px;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links span {
+            opacity: 0.8;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .chatbox-container {
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 15px;
+            }
+
+            .chatbox-header {
+                padding: 15px;
+            }
+
+            .header-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .header-text h3 {
+                font-size: 18px;
+            }
+
+            .chat-messages {
+                padding: 15px;
+                gap: 12px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .message-content {
+                padding: 12px 16px;
+            }
+
+            .chat-input-container {
+                padding: 15px;
+            }
+
+            .quick-questions {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .quick-question {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .chat-input {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            .send-button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        /* Message content formatting */
+        .message-content strong {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .message-content .highlight {
+            background: rgba(251, 191, 36, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbox-container lang-en" id="chatContainer">
+        <div class="chatbox-header">
+            <div class="header-icon">
+                <span class="material-icons">smart_toy</span>
+            </div>
+            <div class="header-text">
+                <h3 class="content-english">AI Wakeel</h3>
+                <h3 class="content-urdu urdu-text">AI وکیل</h3>
+                <p class="content-english">Islamic Inheritance Assistant</p>
+                <p class="content-urdu urdu-text">اسلامی وراثت کا مشیر</p>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span style="font-size: 11px; color: rgba(255, 255, 255, 0.9);" class="content-english">Online & Ready</span>
+                    <span style="font-size: 11px; color: rgba(255, 255, 255, 0.9);" class="content-urdu urdu-text">آن لائن اور تیار</span>
+                </div>
+            </div>
+            <button class="language-toggle" id="langToggle">
+                <span class="material-icons" style="font-size: 18px;">language</span>
+                <span class="content-english">اردو</span>
+                <span class="content-urdu">English</span>
+            </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-content">
+                    <span class="material-icons" style="font-size: 16px; margin-right: 5px; vertical-align: text-bottom; color: #fbbf24;">nights_stay</span>
+                    <span class="content-english">السلام علیکم ورحمۃ اللہ وبرکاتہ! I'm AI Wakeel, your dedicated Islamic inheritance assistant. I'm here to guide you through Islamic will-making (Wasiyat) according to Quranic principles and Shari'ah law. How may I assist you today?</span>
+                    <span class="content-urdu urdu-text">السلام علیکم ورحمۃ اللہ وبرکاتہ! میں AI وکیل ہوں، آپ کا مخصوص اسلامی وراثت کا مشیر۔ میں قرآنی اصولوں اور شریعت کے مطابق اسلامی وصیت سازی میں آپ کی رہنمائی کے لیے یہاں موجود ہوں۔ آج آپ کی کیسے مدد کر سکتا ہوں؟</span>
+                </div>
+                <div class="message-time" id="welcomeTime"></div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <span class="material-icons" style="font-size: 16px;">smart_toy</span>
+                <span class="content-english">AI Wakeel is thinking</span>
+                <span class="content-urdu urdu-text">AI وکیل سوچ رہا ہے</span>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="quick-questions" id="quickQuestions">
+                <button class="quick-question content-english" data-question="How to calculate Islamic inheritance shares?">
+                    <span class="material-icons" style="font-size: 16px;">calculate</span>
+                    Inheritance Calculator
+                </button>
+                <button class="quick-question content-english" data-question="What is the 1/3 rule in Islamic will?">
+                    <span class="material-icons" style="font-size: 16px;">balance</span>
+                    1/3 Rule
+                </button>
+                <button class="quick-question content-english" data-question="Who can be a wakeel in Islamic will?">
+                    <span class="material-icons" style="font-size: 16px;">person</span>
+                    Wakeel Guide
+                </button>
+                <button class="quick-question content-english" data-question="How to calculate Zakat on assets?">
+                    <span class="material-icons" style="font-size: 16px;">volunteer_activism</span>
+                    Zakat Calculator
+                </button>
+                
+                <button class="quick-question content-urdu urdu-text" data-question="اسلامی وراثت کے حصے کیسے بانٹے جاتے ہیں؟">
+                    <span class="material-icons" style="font-size: 16px;">calculate</span>
+                    وراثت کیلکولیٹر
+                </button>
+                <button class="quick-question content-urdu urdu-text" data-question="اسلامی وصیت میں ایک تہائی کا قانون کیا ہے؟">
+                    <span class="material-icons" style="font-size: 16px;">balance</span>
+                    تہائی کا اصول
+                </button>
+                <button class="quick-question content-urdu urdu-text" data-question="اسلامی وصیت میں وکیل کون بن سکتا ہے؟">
+                    <span class="material-icons" style="font-size: 16px;">person</span>
+                    وکیل کی رہنمائی
+                </button>
+                <button class="quick-question content-urdu urdu-text" data-question="اثاثوں پر زکوٰۃ کیسے نکالی جاتی ہے؟">
+                    <span class="material-icons" style="font-size: 16px;">volunteer_activism</span>
+                    زکوٰۃ کیلکولیٹر
+                </button>
+            </div>
+            
+            <div class="chat-input-wrapper">
+                <textarea class="chat-input" id="chatInput" rows="1"
+                       placeholder="Type your question about Islamic inheritance and Wasiyat..." 
+                       data-placeholder-en="Type your question about Islamic inheritance and Wasiyat..."
+                       data-placeholder-ur="اسلامی وراثت اور وصیت کے بارے میں اپنا سوال ٹائپ کریں..."></textarea>
+                <button class="send-button" id="sendButton">
+                    <span class="material-icons">send</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="islamic-footer">
+            <div class="islamic-date" id="islamicDate">1446 ہجری</div>
+            <div class="footer-links">
+                <span>Built with Islamic principles</span>
+                <span>|</span>
+                <span class="content-english">Powered by AlWassi.pk</span>
+                <span class="content-urdu urdu-text">AlWassi.pk کی جانب سے</span>
+                <span>|</span>
+                <span>Shari'ah Compliant</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Islamic Inheritance Knowledge Base
+        const islamicKnowledgeBase = {
+            inheritance: {
+                en: {
+                    basic_shares: "Islamic Inheritance Distribution:\n\nFixed Shares (Fara'id):\n• Husband: 1/2 (no children) or 1/4 (with children)\n• Wife: 1/4 (no children) or 1/8 (with children)\n• Father: 1/6 (with male children) or residue\n• Mother: 1/3 (no children/siblings) or 1/6\n• Daughter: 1/2 (alone) or 2/3 (multiple)\n• Son: Gets double the share of daughters\n\nRemaining estate goes to 'Asabah (agnate heirs) according to Quranic law.",
+                    
+                    calculator_details: "Smart Islamic Calculator Features:\n\n• Automatic Calculation: Handles complex family structures instantly\n• Multiple Scenarios: Supports polygamous marriages, adopted children\n• Debt Deduction: Automatically deducts debts before distribution\n• Quranic Compliance: 100% verified by Islamic scholars\n• Real-time Updates: Adjusts shares based on changing circumstances\n• PDF Generation: Creates legal documents with digital signatures",
+                    
+                    debts_priority: "Debt Settlement Priority in Islam:\n\nBefore inheritance distribution:\n1. Funeral expenses (reasonable costs)\n2. Outstanding debts (loans, bills, obligations)\n3. Administrative costs (legal fees, documentation)\n4. Zakat arrears (unpaid religious obligations)\n\nOnly remaining estate can be distributed among heirs according to Islamic law."
+                },
+                ur: {
+                    basic_shares: "اسلامی وراثت کی تقسیم:\n\nمقررہ حصے (فرائض):\n• شوہر: 1/2 (اولاد نہیں) یا 1/4 (اولاد کے ساتھ)\n• بیوی: 1/4 (اولاد نہیں) یا 1/8 (اولاد کے ساتھ)\n• باپ: 1/6 (بیٹوں کے ساتھ) یا باقی\n• ماں: 1/3 (اولاد/بہن بھائی نہیں) یا 1/6\n• بیٹی: 1/2 (اکیلی) یا 2/3 (متعدد)\n• بیٹا: بیٹیوں سے دوگنا حصہ\n\nباقی ترکہ عصبہ (مرد رشتے داروں) کو قرآنی قانون کے مطابق ملتا ہے۔",
+                    
+                    calculator_details: "سمارٹ اسلامی کیلکولیٹر کی خصوصیات:\n\n• خودکار حساب کتاب: پیچیدہ خاندانی ڈھانچے فوری طور پر سنبھالتا ہے\n• متعدد منظرنامے: کثیر الزواجی، منہ بولے بچوں کی سپورٹ\n• قرض کی کٹوتی: تقسیم سے پہلے قرض خودکار طور پر کاٹتا ہے\n• قرآنی مطابقت: اسلامی علماء سے 100٪ تصدیق شدہ\n• ریئل ٹائم اپڈیٹس: حالات کے مطابق حصے ایڈجسٹ کرتا ہے\n• PDF جنریشن: ڈیجیٹل دستخط کے ساتھ قانونی دستاویزات",
+                    
+                    debts_priority: "اسلام میں قرض کی ادائیگی کی ترجیح:\n\nوراثت تقسیم سے پہلے:\n1. جنازے کے اخراجات (معقول لاگت)\n2. بقایا قرض (قرضے، بل، ذمہ داریاں)\n3. انتظامی اخراجات (قانونی فیس، دستاویزات)\n4. زکوٰۃ کی باقیات (غیر ادا شدہ مذہبی ذمہ داریاں)\n\nصرف بقایا ترکہ اسلامی قانون کے مطابق وارثوں میں تقسیم ہو سکتا ہے۔"
+                }
+            },
+            
+            wasiyat: {
+                en: {
+                    one_third_rule: "The 1/3 Rule in Islamic Will:\n\nKey Points:\n• Maximum bequest: Only 1/3 of total estate\n• Remaining 2/3: Must follow Islamic inheritance law\n• Purpose: Protects family rights while allowing charity\n• Beneficiaries: Non-heirs, charity, specific causes\n• Restrictions: Cannot favor one heir over others\n\nExample: Estate worth Rs. 3,000,000\n- 1/3 for will (Rs. 1,000,000)\n- 2/3 for heirs (Rs. 2,000,000)",
+                    
+                    wakeel_selection: "Choosing the Right Wakeel (Executor):\n\nEssential Qualities:\n• Trustworthy Muslim with good character\n• Knowledge of Islamic law and inheritance\n• Family member or close friend preferred\n• Financially responsible and organized\n• Good health and reasonable age\n\nYou can appoint up to 3 Wakeels for better security and efficiency. They should work together to execute your will according to Islamic principles.",
+                    
+                    will_validity: "Valid Islamic Will Requirements:\n\nLegal Requirements:\n• Sound mind (not under influence/coercion)\n• Two witnesses (adult, sane Muslims)\n• Clear documentation in understandable language\n• Shari'ah compliance (no forbidden elements)\n• Proper signatures and dates\n• CNIC verification of all parties involved\n\nAlWassi.pk ensures all requirements are met automatically."
+                },
+                ur: {
+                    one_third_rule: "اسلامی وصیت میں تہائی کا اصول:\n\nاہم نکات:\n• زیادہ سے زیادہ وصیت: کل ترکے کا صرف 1/3 حصہ\n• باقی 2/3: اسلامی وراثت کے قانون کے مطابق\n• مقصد: خیرات کی اجازت دیتے ہوئے خاندانی حقوق محفوظ رکھنا\n• فائدہ اٹھانے والے: غیر وارث، خیرات، مخصوص مقاصد\n• پابندیاں: ایک وارث کو دوسرے پر ترجیح نہیں دے سکتے\n\nمثال: 30 لاکھ روپے کا ترکہ\n- وصیت کے لیے 1/3 (10 لاکھ)\n- وارثوں کے لیے 2/3 (20 لاکھ)",
+                    
+                    wakeel_selection: "صحیح وکیل (منتظم) کا انتخاب:\n\nضروری خصوصیات:\n• قابل اعتماد مسلمان اچھے کردار کے ساتھ\n• اسلامی قانون کا علم اور وراثت کی سمجھ\n• خاندانی فرد یا قریبی دوست ترجیحاً\n• مالی طور پر ذمہ دار اور منظم\n• اچھی صحت اور مناسب عمر\n\nآپ 3 وکیل تک مقرر کر سکتے ہیں بہتر سیکیورٹی اور کارکردگی کے لیے۔ انہیں اسلامی اصولوں کے مطابق آپ کی وصیت پر عمل کرنے کے لیے مل کر کام کرنا چاہیے۔",
+                    
+                    will_validity: "درست اسلامی وصیت کی شرائط:\n\nقانونی ضروریات:\n• عقل مند ہونا (دباؤ یا نشے میں نہ ہونا)\n• دو گواہ (بالغ، عقل مند مسلمان)\n• واضح دستاویز سمجھ آنے والی زبان میں\n• شرعی مطابقت (کوئی ممنوع عنصر نہیں)\n• مناسب دستخط اور تاریخیں\n• شناختی کارڈ کی تصدیق تمام فریقین کی\n\nAlWassi.pk تمام ضروریات کو خودکار طور پر پورا کرتا ہے۔"
+                }
+            },
+            
+            zakat: {
+                en: {
+                    calculation_guide: "Zakat Calculation Guide:\n\nCurrent Nisab (2024):\n• Gold: 87.48 grams (≈Rs. 850,000)\n• Silver: 612.36 grams (≈Rs. 120,000)\n• Rate: 2.5% annually\n\nZakatable Assets:\n• Cash in hand/bank accounts\n• Gold & silver jewelry\n• Business inventory\n• Rental property income\n• Stocks & investments\n\nFormula: (Total Assets - Debts) × 2.5%",
+                    
+                    sadaqah_info: "Sadaqah vs Zakat:\n\nSadaqah (Voluntary):\n• Any amount, anytime\n• Can be given to anyone\n• No specific calculation\n• Extra reward from Allah\n\nZakat (Obligatory):\n• Fixed 2.5% rate\n• Specific recipients (8 categories)\n• Annual requirement\n• Religious obligation\n\nBoth bring immense blessings and purify your wealth!"
+                },
+                ur: {
+                    calculation_guide: "زکوٰۃ کی گنتی کی رہنمائی:\n\nموجودہ نصاب (2024):\n• سونا: 87.48 گرام (تقریباً 8.5 لاکھ روپے)\n• چاندی: 612.36 گرام (تقریباً 1.2 لاکھ روپے)\n• شرح: سالانہ 2.5%\n\nزکوٰۃ کے قابل اثاثے:\n• ہاتھ میں/بینک اکاؤنٹ میں نقد رقم\n• سونے چاندی کے زیورات\n• کاروباری انوینٹری\n• کرائے کی آمدنی\n• سٹاکس اور سرمایہ کاری\n\nفارمولا: (کل اثاثے - قرض) × 2.5%",
+                    
+                    sadaqah_info: "صدقہ بمقابلہ زکوٰۃ:\n\nصدقہ (رضاکارانہ):\n• کوئی بھی رقم، کسی بھی وقت\n• کسی کو بھی دے سکتے ہیں\n• کوئی مخصوص حساب کتاب نہیں\n• اللہ سے اضافی اجر\n\nزکوٰۃ (فرض):\n• مقررہ 2.5% شرح\n• مخصوص وصول کنندگان (8 اقسام)\n• سالانہ ضروری\n• مذہبی فرض\n\nدونوں بے شمار برکتیں لاتے ہیں اور آپ کے مال کو پاک کرتے ہیں!"
+                }
+            }
+        };
+
+        // Enhanced response system with more contextual understanding
+        let currentLang = 'en';
+        let conversationHistory = [];
+        const chatContainer = document.getElementById('chatContainer');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const langToggle = document.getElementById('langToggle');
+        const quickQuestions = document.getElementById('quickQuestions');
+
+        // Initialize welcome time
+        document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        // Enhanced Islamic date calculation
+        function getIslamicDate() {
+            const today = new Date();
+            const islamicYear = Math.floor((today.getFullYear() - 622) * 1.030684) + 1;
+            const months = ['محرم', 'صفر', 'ربیع الاول', 'ربیع الثانی', 'جمادی الاول', 'جمادی الثانی', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذی القعدہ', 'ذی الحجہ'];
+            const islamicMonth = months[today.getMonth()];
+            return `${islamicYear} ہجری - ${islamicMonth}`;
+        }
+
+        document.getElementById('islamicDate').textContent = getIslamicDate();
+
+        // Language Toggle
+        langToggle.addEventListener('click', () => {
+            currentLang = currentLang === 'en' ? 'ur' : 'en';
+            chatContainer.className = `chatbox-container lang-${currentLang}`;
+            
+            // Update input placeholder
+            const placeholder = currentLang === 'en' ? 
+                chatInput.getAttribute('data-placeholder-en') : 
+                chatInput.getAttribute('data-placeholder-ur');
+            chatInput.placeholder = placeholder;
+        });
+
+        // Quick Questions
+        quickQuestions.addEventListener('click', (e) => {
+            if (e.target.classList.contains('quick-question') || e.target.closest('.quick-question')) {
+                const questionBtn = e.target.closest('.quick-question') || e.target;
+                const question = questionBtn.getAttribute('data-question');
+                sendMessage(question, false);
+            }
+        });
+
+        // Enhanced message sending
+        function sendMessage(message, isUser = true) {
+            if (!message.trim()) return;
+
+            chatInput.disabled = true;
+            sendButton.disabled = true;
+
+            if (isUser) {
+                addMessage(message, 'user');
+                chatInput.value = '';
+                conversationHistory.push({role: 'user', message: message, timestamp: new Date()});
+            }
+
+            showTypingWithDelay(() => {
+                const response = generateIntelligentResponse(message);
+                hideTyping();
+                addMessage(response, 'bot');
+                conversationHistory.push({role: 'bot', message: response, timestamp: new Date()});
+                
+                chatInput.disabled = false;
+                sendButton.disabled = false;
+                chatInput.focus();
+            });
+        }
+
+        // Response generation
+        function generateIntelligentResponse(userMessage) {
+            const message = userMessage.toLowerCase().trim();
+            
+            // Islamic greetings
+            if (message.includes('سلام') || message.includes('assalam') || message.includes('hello') || message.includes('hi')) {
+                const greetings = {
+                    en: [
+                        'وعلیکم السلام ورحمۃ اللہ وبرکاتہ! Welcome to AlWassi.pk\'s AI assistant. I\'m here to help you with Islamic inheritance and will-making. May Allah bless your intentions.',
+                        'السلام علیکم! I\'m here to guide you through Islamic inheritance law with wisdom from the Quran and Sunnah. How can I help you today?'
+                    ],
+                    ur: [
+                        'وعلیکم السلام ورحمۃ اللہ وبرکاتہ! AlWassi.pk کے AI اسسٹنٹ میں خوش آمدید۔ اسلامی وراثت اور وصیت سازی میں آپ کی مدد کرنا میرے لیے اعزاز کی بات ہے۔',
+                        'السلام علیکم! میں قرآن اور سنت کی حکمت کے ساتھ اسلامی وراثت کے قانون میں آپ کی رہنمائی کے لیے یہاں موجود ہوں۔'
+                    ]
+                };
+                return getRandomResponse(greetings[currentLang]);
+            }
+
+            // Goodbyes
+            if (message.includes('bye') || message.includes('خدا حافظ') || message.includes('goodbye')) {
+                const farewells = {
+                    en: [
+                        'اللہ حافظ! May Allah protect you and your family. Remember to prepare your Islamic will - it\'s a blessed Sunnah.',
+                        'فی أمان الله! May Allah grant you success in organizing your affairs according to His will.'
+                    ],
+                    ur: [
+                        'اللہ حافظ! اللہ آپ کو اور آپ کے خاندان کو اپنی حفاظت میں رکھے۔ اپنی اسلامی وصیت تیار کرنا نہ بھولیں۔',
+                        'فی امان اللہ! اللہ آپ کو اپنی مرضی کے مطابق معاملات منظم کرنے میں کامیابی عطا فرمائے۔'
+                    ]
+                };
+                return getRandomResponse(farewells[currentLang]);
+            }
+
+            // Inheritance queries
+            if (message.includes('inherit') || message.includes('share') || message.includes('وراثت') || message.includes('حصہ')) {
+                return islamicKnowledgeBase.inheritance[currentLang].basic_shares;
+            }
+
+            // 1/3 rule queries
+            if (message.includes('1/3') || message.includes('تہائی') || message.includes('wasiyat') || message.includes('وصیت')) {
+                return islamicKnowledgeBase.wasiyat[currentLang].one_third_rule;
+            }
+
+            // Wakeel queries
+            if (message.includes('wakeel') || message.includes('وکیل') || message.includes('executor')) {
+                return islamicKnowledgeBase.wasiyat[currentLang].wakeel_selection;
+            }
+
+            // Zakat queries
+            if (message.includes('zakat') || message.includes('زکوٰۃ') || message.includes('charity')) {
+                return islamicKnowledgeBase.zakat[currentLang].calculation_guide;
+            }
+
+            // Default responses
+            const contextualResponses = {
+                en: [
+                    "That's a thoughtful question about Islamic inheritance law. Let me provide you with guidance based on Quranic principles. Which specific aspect would you like me to explain?",
+                    "Islamic inheritance is a comprehensive system designed by Allah for fairness and family harmony. What particular scenario are you dealing with?",
+                    "You're taking the right step by seeking Islamic guidance for your will. Let me help you understand the specific requirements.",
+                    "Your question touches on important aspects of Islamic financial planning. Would you like me to explain the relevant Islamic rulings?"
+                ],
+                ur: [
+                    "اسلامی وراثت کے قانون کے بارے میں یہ بہت اچھا سوال ہے۔ قرآنی اصولوں کی بنیاد پر رہنمائی فراہم کرتا ہوں۔",
+                    "اسلامی وراثت ایک جامع نظام ہے جو اللہ نے انصاف اور خاندانی ہم آہنگی کے لیے بنایا ہے۔ آپ کس صورتحال سے نمٹ رہے ہیں؟",
+                    "آپ اپنی وصیت کے لیے اسلامی رہنمائی حاصل کرکے صحیح قدم اٹھا رہے ہیں۔ مخصوص ضروریات سمجھانے میں مدد کروں گا۔",
+                    "آپ کا سوال اسلامی مالی منصوبہ بندی کے اہم پہلوؤں کو چھوتا ہے۔ متعلقہ اسلامی احکام کی وضاحت کروں؟"
+                ]
+            };
+
+            return getRandomResponse(contextualResponses[currentLang]);
+        }
+
+        function getRandomResponse(responseArray) {
+            return responseArray[Math.floor(Math.random() * responseArray.length)];
+        }
+
+        function addMessage(content, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            
+            const time = new Date().toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            
+            const formattedContent = formatMessageContent(content);
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${formattedContent}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function formatMessageContent(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>')
+                .replace(/• /g, '<span style="color: #10b981; margin-right: 8px;">•</span> ');
+        }
+
+        function showTypingWithDelay(callback) {
+            showTyping();
+            const delay = 1000 + Math.random() * 1500;
+            setTimeout(callback, delay);
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', () => {
+            sendMessage(chatInput.value.trim());
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(chatInput.value.trim());
+            }
+        });
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Welcome message
+        setTimeout(() => {
+            const welcomeMessages = {
+                en: "Welcome to AlWassi.pk's Islamic Inheritance Assistant!\n\nI'm here to guide you through:\n• Quranic Inheritance Calculations\n• Islamic Will (Wasiyat) Creation\n• Wakeel Selection Guidance\n• Zakat & Sadaqah Information\n\nFeel free to ask me anything about Islamic inheritance law!",
+                ur: "AlWassi.pk کے اسلامی وراثت اسسٹنٹ میں خوش آمدید!\n\nمیں آپ کی رہنمائی کروں گا:\n• قرآنی وراثت کی گنتی\n• اسلامی وصیت بنانا\n• وکیل کے انتخاب کی رہنمائی\n• زکوٰۃ اور صدقہ کی معلومات\n\nاسلامی وراثت کے قانون کے بارے میں بے جھجک سوال کریں!"
+            };
+            
+            addMessage(welcomeMessages[currentLang], 'bot');
+        }, 1000);
+
+        console.log('AI Wakeel Islamic Assistant initialized successfully!');
+    </script>
+</body>
+</html>

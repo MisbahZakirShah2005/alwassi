@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic Inheritance Calculator - AlWassi.pk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="calculater.css">
+</head>
+<body>
+    <!-- Language Toggle -->
+    <button class="lang-toggle" id="langToggle">
+        <span class="content-english">اردو</span>
+        <span class="content-urdu">English</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="content-english">
+                <h1><i class="fas fa-balance-scale"></i> Islamic Inheritance Calculator</h1>
+                <p class="header-urdu urdu-text">اسلامی وراثت کیلکولیٹر</p>
+                <p class="header-subtitle">Calculate inheritance shares according to Quranic law and Islamic jurisprudence</p>
+            </div>
+            <div class="content-urdu">
+                <h1 class="urdu-text"><i class="fas fa-balance-scale"></i> اسلامی وراثت کیلکولیٹر</h1>
+                <p class="header-urdu urdu-text">Islamic Inheritance Calculator</p>
+                <p class="header-subtitle urdu-text">قرآنی قانون اور اسلامی فقہ کے مطابق وراثت کے حصوں کا حساب کتاب</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="calculator-card">
+            <div class="calculator-header">
+                <h2 class="content-english">☪ Shari'ah Compliant Calculator</h2>
+                <h2 class="content-urdu urdu-text">☪ شریعت کے مطابق کیلکولیٹر</h2>
+                <p class="content-english">Enter family details to calculate inheritance shares</p>
+                <p class="content-urdu urdu-text">وراثت کے حصوں کا حساب کتاب کے لیے خاندانی تفصیلات درج کریں</p>
+            </div>
+
+            <div class="calculator-body">
+                <!-- Error Message -->
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorText"></span>
+                </div>
+
+                <!-- Deceased Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>
+                        <span class="content-english">Deceased Information</span>
+                        <span class="content-urdu urdu-text">متوفی کی معلومات</span>
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-venus-mars"></i>
+                                Gender
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-venus-mars"></i>
+                                جنس
+                            </label>
+                            <select id="deceasedGender">
+                                <option value="" class="content-english">Select Gender</option>
+                                <option value="male" class="content-english">Male</option>
+                                <option value="female" class="content-english">Female</option>
+                                <option value="" class="content-urdu">جنس منتخب کریں</option>
+                                <option value="male" class="content-urdu">مرد</option>
+                                <option value="female" class="content-urdu">عورت</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-dollar-sign"></i>
+                                Total Estate Value (PKR)
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-dollar-sign"></i>
+                                کل جائیداد کی قیمت (روپے)
+                            </label>
+                            <input type="number" id="estateValue" placeholder="1000000" min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spouse Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-heart"></i>
+                        <span class="content-english">Spouse Information</span>
+                        <span class="content-urdu urdu-text">شریک حیات کی معلومات</span>
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-ring"></i>
+                                Number of Wives (if male deceased)
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-ring"></i>
+                                بیویوں کی تعداد (اگر مرد متوفی)
+                            </label>
+                            <select id="numWives">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-male"></i>
+                                Husband Alive? (if female deceased)
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-male"></i>
+                                شوہر زندہ ہے؟ (اگر عورت متوفی)
+                            </label>
+                            <select id="husbandAlive">
+                                <option value="no" class="content-english">No</option>
+                                <option value="yes" class="content-english">Yes</option>
+                                <option value="no" class="content-urdu">نہیں</option>
+                                <option value="yes" class="content-urdu">ہاں</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Children Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-child"></i>
+                        <span class="content-english">Children Information</span>
+                        <span class="content-urdu urdu-text">اولاد کی معلومات</span>
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-mars"></i>
+                                Number of Sons
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-mars"></i>
+                                بیٹوں کی تعداد
+                            </label>
+                            <input type="number" id="numSons" min="0" value="0">
+                        </div>
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-venus"></i>
+                                Number of Daughters
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-venus"></i>
+                                بیٹیوں کی تعداد
+                            </label>
+                            <input type="number" id="numDaughters" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parents Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-users"></i>
+                        <span class="content-english">Parents Information</span>
+                        <span class="content-urdu urdu-text">والدین کی معلومات</span>
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-male"></i>
+                                Father Alive?
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-male"></i>
+                                والد زندہ ہیں؟
+                            </label>
+                            <select id="fatherAlive">
+                                <option value="no" class="content-english">No</option>
+                                <option value="yes" class="content-english">Yes</option>
+                                <option value="no" class="content-urdu">نہیں</option>
+                                <option value="yes" class="content-urdu">ہاں</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-female"></i>
+                                Mother Alive?
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-female"></i>
+                                والدہ زندہ ہیں؟
+                            </label>
+                            <select id="motherAlive">
+                                <option value="no" class="content-english">No</option>
+                                <option value="yes" class="content-english">Yes</option>
+                                <option value="no" class="content-urdu">نہیں</option>
+                                <option value="yes" class="content-urdu">ہاں</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Siblings Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-friends"></i>
+                        <span class="content-english">Siblings Information</span>
+                        <span class="content-urdu urdu-text">بہن بھائیوں کی معلومات</span>
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-mars"></i>
+                                Number of Brothers
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-mars"></i>
+                                بھائیوں کی تعداد
+                            </label>
+                            <input type="number" id="numBrothers" min="0" value="0">
+                        </div>
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-venus"></i>
+                                Number of Sisters
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-venus"></i>
+                                بہنوں کی تعداد
+                            </label>
+                            <input type="number" id="numSisters" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debts and Expenses -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-receipt"></i>
+                        <span class="content-english">Debts & Funeral Expenses</span>
+                        <span class="content-urdu urdu-text">قرضے اور جنازے کے اخراجات</span>
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Total Debts (PKR)
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-money-bill-wave"></i>
+                                کل قرضے (روپے)
+                            </label>
+                            <input type="number" id="totalDebts" min="0" value="0">
+                        </div>
+                        <div class="form-field">
+                            <label class="content-english">
+                                <i class="fas fa-coins"></i>
+                                Funeral Expenses (PKR)
+                            </label>
+                            <label class="content-urdu urdu-text">
+                                <i class="fas fa-coins"></i>
+                                جنازے کے اخراجات (روپے)
+                            </label>
+                            <input type="number" id="funeralExpenses" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <button class="calculate-btn" id="calculateBtn">
+                    <i class="fas fa-calculator"></i>
+                    <span class="content-english">Calculate Inheritance</span>
+                    <span class="content-urdu urdu-text">وراثت کا حساب کتاب کریں</span>
+                </button>
+
+                <!-- Loading Animation -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p class="content-english">Calculating according to Islamic law...</p>
+                    <p class="content-urdu urdu-text">اسلامی قانون کے مطابق حساب کتاب ہو رہا ہے...</p>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results" id="results">
+                    <div class="results-header">
+                        <h3 class="content-english">Inheritance Distribution Results</h3>
+                        <h3 class="content-urdu urdu-text"> وراثت کی تقسیم کے نتائج</h3>
+                    </div>
+
+                    <div class="total-estate">
+                        <div class="content-english">
+                            <strong>Net Estate After Debts & Expenses: PKR <span id="netEstate">0</span></strong>
+                        </div>
+                        <div class="content-urdu urdu-text">
+                            <strong>قرضوں اور اخراجات کے بعد خالص جائیداد: <span id="netEstateUrdu">0</span> روپے</strong>
+                        </div>
+                    </div>
+
+                    <div class="inheritance-grid" id="inheritanceGrid">
+                        <!-- Results will be dynamically populated -->
+                    </div>
+
+                    <!-- Islamic Guidelines -->
+                    <div class="islamic-note">
+                        <i class="fas fa-mosque"></i>
+                        <div class="content-english">
+                            <p><strong>Important Islamic Note:</strong> This calculation is based on Quranic principles and general Islamic inheritance law. For complex cases or specific legal matters, please consult with a qualified Islamic scholar or legal expert.</p>
+                        </div>
+                        <div class="content-urdu urdu-text">
+                            <p><strong>اہم اسلامی نوٹ:</strong> یہ حساب کتاب قرآنی اصولوں اور عمومی اسلامی وراثت کے قانون پر مبنی ہے۔ پیچیدہ معاملات یا مخصوص قانونی امور کے لیے، برائے کرم کسی qualified اسلامی عالم یا قانونی ماہر سے مشورہ کریں۔</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <script src="calculater.js"></script>
+</body>
+</html>

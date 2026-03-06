@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlWassi.pk - Authentication</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+        :root {
+                        --primary-green: #0d7377;
+            --secondary-green: #14a085;
+            --light-green: #7fb069;
+            --gold: #d4af37;
+            --dark-blue: #1a365d;
+            --light-gray: #f7fafc;
+            --text-dark: #0c1807;
+            --text-light: #020304;
+
+            --gradient: linear-gradient(135deg, #14a085 0%, #0d7377 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            
+            line-height: 1.6;
+            min-height: 100vh;
+             background: linear-gradient(rgba(13, 115, 119, 0.8), rgba(20, 160, 133, 0.8)), 
+                        url('https://images.unsplash.com/photo-1542816417-0983c9c9ad53?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+     
+            display: flex;
+           line-height: 1.6;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .urdu-text {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .auth-container {
+            background: transparent;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+        }
+
+        .auth-visual {
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(27, 25, 25, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            color: var(--gold);
+            font-size: 1.8rem;
+        }
+
+        .logo::before {
+         
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .visual-content h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .visual-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.7;
+        }
+
+        .auth-form {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .form-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--error-color);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .input-group .form-input {
+            padding-left: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            font-size: 14px;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-color);
+        }
+
+        .forgot-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--primary-dark);
+        }
+
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--dark-blue);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .form-switch {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-switch a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .form-switch a:hover {
+            color: var(--primary-dark);
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .content-english, .content-urdu {
+            display: block;
+        }
+
+        .content-urdu {
+            display: none;
+        }
+
+        [data-lang="urdu"] .content-english {
+            display: none;
+        }
+
+        [data-lang="urdu"] .content-urdu {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .two-factor-section {
+            display: none;
+        }
+
+        .two-factor-section.active {
+            display: block;
+        }
+
+        .verification-code {
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 0.5em;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .auth-visual {
+                display: none;
+            }
+
+            .auth-form {
+                padding: 32px 24px;
+            }
+
+            body {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-form {
+                padding: 24px 20px;
+            }
+
+            .form-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body data-lang="english">
+  <div class="auth-container">
+    <!-- Visual Section -->
+    <div class="auth-visual">
+      <button class="lang-toggle" onclick="toggleLanguage()">
+        <span class="content-english">اردو</span>
+        <span class="content-urdu">English</span>
+      </button>
+      <div class="visual-content">
+        <div class="logo">
+          <i class="fas fa-scroll"></i>
+          <span>AlWassi.pk</span>
+        </div>
+        <div class="content-english">
+          <h2>Secure Your Legacy</h2>
+          <p>Join thousands of Pakistani families who trust AlWassi.pk for creating Shari'ah-compliant Islamic wills. Simple, secure, and spiritually aligned.</p>
+        </div>
+        <div class="content-urdu">
+          <h2 class="urdu-text">اپنی میراث محفوظ کریں</h2>
+          <p class="urdu-text">ہزاروں پاکستانی خاندانوں کے ساتھ شامل ہوں جو شریعت کے مطابق اسلامی وصیت بنانے کے لیے AlWassi.pk پر بھروسہ کرتے ہیں۔ آسان، محفوظ، اور روحانی طور پر متوازن۔</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="auth-form">
+      <!-- Login Form -->
+      <form id="loginForm" style="display: block;">
+        <div class="form-header">
+          <h1 class="form-title content-english">Welcome Back</h1>
+          <h1 class="form-title content-urdu urdu-text">خوش آمدید</h1>
+          <p class="form-subtitle content-english">Sign in to your account</p>
+          <p class="form-subtitle content-urdu urdu-text">اپنے اکاؤنٹ میں سائن ان کریں</p>
+        </div>
+
+        <div id="loginAlert"></div>
+
+        <div id="regularLogin">
+          <div class="form-group">
+            <label class="form-label content-english">Email Address</label>
+            <label class="form-label content-urdu urdu-text">ای میل ایڈریس</label>
+            <div class="input-group">
+              <i class="input-icon fas fa-envelope"></i>
+              <input type="email" class="form-input" name="email" placeholder="Enter your email" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label content-english">Password</label>
+            <label class="form-label content-urdu urdu-text">پاس ورڈ</label>
+            <div class="input-group">
+              <i class="input-icon fas fa-lock"></i>
+              <input type="password" class="form-input" name="password" placeholder="Enter your password" required>
+              <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+            <button type="submit" class="btn btn-primary" onclick="openFormPage(event)">
+            <span class="btn-text content-english">Sign In</span>
+            <span class="btn-text content-urdu urdu-text">سائن ان</span>
+            <span class="loading" style="display: none;"></span>
+            </button>
+            <script>
+            function openFormPage(e) {
+              e.preventDefault();
+              // Replace with your form page URL
+              window.location.href = "inheretanceForm.html";
+            }
+            </script>
+        </div>
+
+        <div class="form-switch">
+          <span class="content-english">Don't have an account? 
+            <a href="#" onclick="showRegistration()">Sign Up</a>
+          </span>
+          <span class="content-urdu urdu-text">اکاؤنٹ نہیں ہے؟ 
+            <a href="#" onclick="showRegistration()">رجسٹر کریں</a>
+          </span>
+        </div>
+      </form>
+
+      <!-- Registration Form -->
+      <form id="registerForm" style="display: none;">
+        <div class="form-header">
+          <h1 class="form-title content-english">Create Account</h1>
+          <h1 class="form-title content-urdu urdu-text">اکاؤنٹ بنائیں</h1>
+          <p class="form-subtitle content-english">Join AlWassi.pk today</p>
+          <p class="form-subtitle content-urdu urdu-text">آج ہی AlWassi.pk میں شامل ہوں</p>
+        </div>
+
+        <div id="registerAlert"></div>
+
+        <div class="form-group">
+          <label class="form-label content-english">Full Name</label>
+          <label class="form-label content-urdu urdu-text">مکمل نام</label>
+          <div class="input-group">
+            <i class="input-icon fas fa-user"></i>
+            <input type="text" class="form-input" name="name" placeholder="Enter your full name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label content-english">Email Address</label>
+          <label class="form-label content-urdu urdu-text">ای میل ایڈریس</label>
+          <div class="input-group">
+            <i class="input-icon fas fa-envelope"></i>
+            <input type="email" class="form-input" name="email" placeholder="Enter your email" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label content-english">Password</label>
+          <label class="form-label content-urdu urdu-text">پاس ورڈ</label>
+          <div class="input-group">
+            <i class="input-icon fas fa-lock"></i>
+            <input type="password" class="form-input" name="password" placeholder="Create a strong password" required minlength="6">
+            <button type="button" class="password-toggle" onclick="togglePassword(this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span class="btn-text content-english">Create Account</span>
+          <span class="btn-text content-urdu urdu-text">اکاؤنٹ بنائیں</span>
+          <span class="loading" style="display: none;"></span>
+        </button>
+
+        <div class="form-switch">
+          <span class="content-english">Already have an account? 
+            <a href="#" onclick="showLogin()">Sign In</a>
+          </span>
+          <span class="content-urdu urdu-text">پہلے سے اکاؤنٹ ہے؟ 
+            <a href="#" onclick="showLogin()">سائن ان</a>
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Language toggle
+    function toggleLanguage() {
+      const currentLang = document.body.getAttribute('data-lang');
+      const newLang = currentLang === 'english' ? 'urdu' : 'english';
+      document.body.setAttribute('data-lang', newLang);
+      localStorage.setItem('language', newLang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.setAttribute('data-lang', localStorage.getItem('language') || 'english');
+    });
+
+    // Show forms
+    function showRegistration() {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+    }
+    function showLogin() {
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+    }
+
+    // Toggle password
+    function togglePassword(btn) {
+      const input = btn.parentElement.querySelector('input');
+      const icon = btn.querySelector('i');
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("fa-eye", "fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.replace("fa-eye-slash", "fa-eye");
+      }
+    }
+
+    // Fake login/register handling
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const alert = document.getElementById("loginAlert");
+      alert.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> Login successful! (Frontend only)</div>`;
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const alert = document.getElementById("registerAlert");
+      alert.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> Account created! (Frontend only)</div>`;
+      setTimeout(showLogin, 1500);
+    });
+  </script>
+</body>
+</html>

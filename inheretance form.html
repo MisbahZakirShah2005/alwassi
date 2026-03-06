@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AlWassi.pk - Wasiyat (Admin & Guardian Demo)</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- jsPDF & QR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* --- Basic theme adapted from your AlWassi.html --- */
+    :root{--primary:#1e3c72;--accent:#2a5298;--muted:#6b7280}
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;margin:0;background:linear-gradient(180deg,#f7f9fc 0%, #eef2ff 100%);color:#123}
+    header{background:var(--primary);color:#fff;padding:18px}
+    header .nav{display:flex;gap:16px;align-items:center;max-width:1200px;margin:0 auto}
+    header .nav .logo{font-weight:700;display:flex;gap:8px;align-items:center}
+    header .nav a{color:#fff;text-decoration:none;margin-left:14px;font-weight:600}
+    .container{max-width:1100px;margin:22px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    .card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 20px rgba(30,30,60,0.06)}
+    h2{color:var(--primary);margin:0 0 12px}
+    label{display:block;margin-top:10px;font-size:13px;color:#333}
+    input[type=text], input[type=file], select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9f2}
+    button{border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--primary),var(--accent));color:#fff}
+    .btn-ghost{background:transparent;border:1px solid #e6e9f2}
+    .small{font-size:13px;color:var(--muted)}
+    .list{margin-top:10px}
+    .list-item{padding:10px;border-radius:8px;border:1px dashed #eef2ff;margin-bottom:8px;background:#fcfeff}
+    .muted{color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    footer{margin:30px auto;text-align:center;color:var(--muted);font-size:13px}
+
+    /* admin panel */
+    .admin-panel{background:#fffbe6;border:1px solid #fff3bf}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;background:#eef2ff;color:var(--primary);font-size:12px}
+
+    /* responsive */
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo"><i class="fas fa-scroll"></i> <span>AlWassi.pk</span></div>
+    <nav style="margin-left:auto">
+      <a href="#create" onclick="scrollToSection('create')">Create Wasiyat</a>
+      <a href="#guardians" onclick="scrollToSection('guardians')">Guardians</a>
+      <a href="#admin" onclick="scrollToSection('admin')">Admin</a>
+      <a href="#download" onclick="scrollToSection('download')">Download</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Top grid: form / side preview -->
+  <div class="grid">
+    <div>
+      <!-- Create Wasiyat -->
+      <div id="create" class="card">
+        <h2>Create Wasiyat (Wasiyat Banayen)</h2>
+        <label>Full Name / مکمل نام</label>
+        <input id="ownerName" type="text" placeholder="e.g. Muhammad Ali Khan" value="Muhammad Ali Khan">
+
+        <label>CNIC / شناختی کارڈ نمبر</label>
+        <input id="ownerCnic" type="text" placeholder="42101-1234567-8" value="42101-1234567-8">
+
+        <label>Language / زبان</label>
+        <select id="lang">
+          <option value="en">English</option>
+          <option value="ur">اردو</option>
+        </select>
+
+        <hr style="margin:14px 0;border:none;border-top:1px dashed #eef2ff">
+
+        <h3 style="margin:0 0 8px">Add Heirs (ورثاء)</h3>
+        <div id="heirList" class="list"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="newHeirName" type="text" placeholder="Heir name">
+          <input id="newHeirShare" type="text" placeholder="Share % (e.g. 25)">
+          <button class="btn-primary" onclick="addHeir()">Add</button>
+        </div>
+
+        <hr style="margin:14px 0;border:none;border-top:1px dashed #eef2ff">
+
+        <h3 style="margin:0 0 8px">Add Assets (اثاثہ)</h3>
+        <div id="assetList" class="list"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="newAssetName" type="text" placeholder="Asset name (House/Bank)">
+          <input id="newAssetValue" type="text" placeholder="Value (PKR)">
+          <button class="btn-primary" onclick="addAsset()">Add</button>
+        </div>
+
+        <div style="margin-top:14px" class="small">Tip: Fill heirs, assets and then assign guardians below. This demo stores data in your browser (localStorage). Replace with API calls for production.</div>
+      </div>
+
+      <!-- Guardians -->
+      <div id="guardians" class="card" style="margin-top:14px">
+        <h2>Guardian Assignment (Wakeel)</h2>
+        <div class="small">Nominate up to <strong>3</strong> trusted people. They cannot download the final PDF until Admin verifies death.</div>
+        <div id="guardianList" class="list"></div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="gName" type="text" placeholder="Guardian name">
+          <input id="gPhone" type="text" placeholder="Phone">
+          <button class="btn-primary" onclick="addGuardian()">Add Guardian</button>
+        </div>
+
+        <div class="actions" style="margin-top:12px">
+          <button class="btn-ghost" onclick="saveDraft()">Save Draft</button>
+          <button class="btn-primary" onclick="clearAll()">Reset (Clear)</button>
+        </div>
+      </div>
+
+      <!-- Download / Guardian actions -->
+      <div id="download" class="card" style="margin-top:14px">
+        <h2>Download / Guardian Actions</h2>
+        <div id="downloadState" class="muted">Current status: <span id="statusBadge" class="badge">draft</span></div>
+
+        <div style="margin-top:12px">
+          <!-- Simulate being a guardian: choose guardian -->
+          <label>Select Guardian (simulate) to perform actions</label>
+          <select id="activeGuardianSelect"></select>
+
+          <label style="margin-top:8px">Upload Death Certificate (guardian action)</label>
+          <input id="deathFile" type="file" accept=".pdf,.jpg,.png,.jpeg">
+
+          <div style="margin-top:8px" class="actions">
+            <button class="btn-primary" onclick="requestDeathVerification()">Request Death Verification</button>
+            <button class="btn-ghost" onclick="previewWasiyat()">Preview Wasiyat</button>
+            <button id="downloadPdfBtn" class="btn-primary" onclick="downloadPDF()" disabled>Download PDF (Locked)</button>
+          </div>
+
+          <div style="margin-top:10px" class="small">Note: after guardian submits request, Admin must approve in Admin Panel for Download to unlock.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Admin + preview -->
+    <aside>
+      <div class="card admin-panel">
+        <h3>Admin Dashboard</h3>
+        <div class="small">Approve or reject death-verification requests. Once approved, guardian gains download access.</div>
+        <div style="margin-top:12px">
+          <h4 style="margin:6px 0">Pending Requests</h4>
+          <div id="pendingList" class="list"></div>
+        </div>
+        <div style="margin-top:12px">
+          <h4 style="margin:6px 0">System Controls</h4>
+          <div style="display:flex;gap:8px">
+            <button class="btn-primary" onclick="adminApproveAll()">Approve All</button>
+            <button class="btn-ghost" onclick="adminRejectAll()">Reject All</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>Wasiyat Preview</h3>
+        <div id="previewBox" style="min-height:220px">
+          <div class="small muted">Preview will appear here (name, heirs, assets, guardians & status)</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>Verify (QR)</h3>
+        <div class="small">Scan the QR on the generated PDF to view verification token (demo).</div>
+        <div id="verifyToken" style="margin-top:8px" class="muted">No token yet</div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="small muted">Demo only — data stored locally. For production attach real backend (NADRA API) & secure server-side PDF signing.</div>
+  </footer>
+</div>
+
+<script>
+/*
+  AlWassi Admin+Guardian demo (client-side)
+  - Stores a single "will" object in localStorage under key "alwassi_will"
+  - Flow: Create -> Add heirs/assets -> Add guardians -> Guardian requests death verification -> Admin approves -> Download unlocks
+*/
+
+/* ---------- Utility / State ---------- */
+const STORAGE_KEY = 'alwassi_will_v1';
+
+// default sample object
+const defaultWill = {
+  ownerName: 'Muhammad Ali Khan',
+  ownerCnic: '42101-1234567-8',
+  lang: 'en',
+  heirs: [
+    {name:'Wife (Fatima)', share:12.5},
+    {name:'Son (Hassan)', share:43.75},
+    {name:'Daughter (Aisha)', share:21.875},
+    {name:'Daughter (Khadija)', share:21.875}
+  ],
+  assets: [{name:'House', value:1000000}],
+  guardians: [],          // {id, name, phone}
+  requests: [],           // {id, guardianId, fileName, timestamp, status: 'pending'|'approved'|'rejected'}
+  status: 'draft',        // draft | death_verification_requested | death_verified
+  verificationToken: null // set on PDF generation
+};
+
+function loadWill(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw){ localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultWill)); return JSON.parse(JSON.stringify(defaultWill)); }
+  try { return JSON.parse(raw); } catch(e){ localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultWill)); return JSON.parse(JSON.stringify(defaultWill)); }
+}
+function saveWill(will){ localStorage.setItem(STORAGE_KEY, JSON.stringify(will)); renderAll(); }
+let will = loadWill();
+
+/* ---------- Render / UI ---------- */
+function renderAll(){
+  will = loadWill();
+  // heirs
+  const heirList = document.getElementById('heirList');
+  heirList.innerHTML = will.heirs.map((h,i)=>`
+    <div class="list-item">
+      <strong>${h.name}</strong> — ${h.share}% 
+      <div class="small muted">#${i+1}</div>
+      <div style="margin-top:6px"><button class="btn-ghost" onclick="removeHeir(${i})">Remove</button></div>
+    </div>
+  `).join('') || '<div class="small muted">No heirs added</div>';
+
+  // assets
+  const assetList = document.getElementById('assetList');
+  assetList.innerHTML = will.assets.map((a,i)=>`
+    <div class="list-item">
+      <strong>${a.name}</strong> — PKR ${Number(a.value).toLocaleString()}
+      <div class="small muted">#${i+1}</div>
+      <div style="margin-top:6px"><button class="btn-ghost" onclick="removeAsset(${i})">Remove</button></div>
+    </div>
+  `).join('') || '<div class="small muted">No assets added</div>';
+
+  // guardians
+  const guardianList = document.getElementById('guardianList');
+  guardianList.innerHTML = will.guardians.map((g,i)=>`
+    <div class="list-item">
+      <strong>${g.name}</strong> — ${g.phone} 
+      <div class="small muted">#${i+1}</div>
+      <div style="margin-top:6px">
+        <button class="btn-ghost" onclick="removeGuardian(${i})">Remove</button>
+        <button class="btn-primary" style="margin-left:6px" onclick="simulateLoginAsGuardian(${i})">Act as</button>
+      </div>
+    </div>
+  `).join('') || '<div class="small muted">No guardians added</div>';
+
+  // populate active guardian select
+  const sel = document.getElementById('activeGuardianSelect');
+  sel.innerHTML = will.guardians.map((g,i)=>`<option value="${g.id}">${g.name} (${g.phone})</option>`).join('') || '<option value="">-- No guardians --</option>';
+
+  // pending requests
+  const pending = document.getElementById('pendingList');
+  if(will.requests.length === 0) pending.innerHTML = '<div class="small muted">No pending requests</div>';
+  else pending.innerHTML = will.requests.map(r=>{
+    const g = will.guardians.find(x=>x.id===r.guardianId) || {name:'Unknown'};
+    return `<div class="list-item">
+      <strong>Request #${r.id}</strong> by <em>${g.name}</em><br>
+      <span class="small">File: ${r.fileName || '—'}</span>
+      <div style="margin-top:8px">
+        <button class="btn-primary" onclick="adminApprove(${r.id})">Approve</button>
+        <button class="btn-ghost" onclick="adminReject(${r.id})">Reject</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // preview
+  const preview = document.getElementById('previewBox');
+  preview.innerHTML = `
+    <div><strong>${will.ownerName}</strong> — ${will.ownerCnic}</div>
+    <div class="small">Status: <span class="badge">${will.status}</span></div>
+    <hr style="border:none;border-top:1px dashed #eef2ff;margin:8px 0">
+    <div><strong>Heirs:</strong> ${will.heirs.map(h=>h.name).join(', ') || '—'}</div>
+    <div><strong>Assets:</strong> ${will.assets.map(a=>a.name).join(', ') || '—'}</div>
+    <div><strong>Guardians:</strong> ${will.guardians.map(g=>g.name).join(', ') || '—'}</div>
+  `;
+
+  // status badge
+  document.getElementById('statusBadge').innerText = will.status;
+
+  // download button enable/disable
+  const dlBtn = document.getElementById('downloadPdfBtn');
+  dlBtn.disabled = will.status !== 'death_verified';
+
+  // verify token display
+  document.getElementById('verifyToken').innerText = will.verificationToken ? `Token: ${will.verificationToken}` : 'No token yet';
+}
+
+/* ---------- CRUD helpers ---------- */
+function addHeir(){
+  const name = document.getElementById('newHeirName').value.trim();
+  const share = parseFloat(document.getElementById('newHeirShare').value);
+  if(!name || isNaN(share)){ alert('Enter heir name and numeric share'); return; }
+  will.heirs.push({name,share});
+  saveWill(will);
+  document.getElementById('newHeirName').value=''; document.getElementById('newHeirShare').value='';
+}
+function removeHeir(idx){ will.heirs.splice(idx,1); saveWill(will); }
+
+function addAsset(){
+  const name = document.getElementById('newAssetName').value.trim();
+  const value = parseInt(document.getElementById('newAssetValue').value);
+  if(!name || isNaN(value)){ alert('Enter asset name and numeric value'); return; }
+  will.assets.push({name,value});
+  saveWill(will);
+  document.getElementById('newAssetName').value=''; document.getElementById('newAssetValue').value='';
+}
+function removeAsset(idx){ will.assets.splice(idx,1); saveWill(will); }
+
+function addGuardian(){
+  if(will.guardians.length >= 3){ alert('Maximum 3 guardians allowed'); return; }
+  const name = document.getElementById('gName').value.trim();
+  const phone = document.getElementById('gPhone').value.trim();
+  if(!name || !phone) { alert('Enter name and phone'); return; }
+  const id = 'G' + Date.now().toString(36).substr(2,6).toUpperCase();
+  will.guardians.push({id,name,phone});
+  saveWill(will);
+  document.getElementById('gName').value=''; document.getElementById('gPhone').value='';
+}
+function removeGuardian(i){ if(confirm('Remove guardian?')){ will.guardians.splice(i,1); saveWill(will); } }
+
+/* ---------- Save / Reset ---------- */
+function saveDraft(){
+  will.ownerName = document.getElementById('ownerName').value || will.ownerName;
+  will.ownerCnic = document.getElementById('ownerCnic').value || will.ownerCnic;
+  will.lang = document.getElementById('lang').value;
+  saveWill(will);
+  alert('Saved locally (demo).');
+}
+function clearAll(){ if(confirm('Clear stored data?')){ localStorage.removeItem(STORAGE_KEY); will = loadWill(); renderAll(); } }
+
+/* ---------- Guardian actions: request verification ---------- */
+function simulateLoginAsGuardian(index){
+  const g = will.guardians[index];
+  if(!g) return alert('Guardian not found');
+  document.getElementById('activeGuardianSelect').value = g.id;
+  alert(`Now acting as guardian: ${g.name}. Select file and click "Request Death Verification"`);
+}
+
+function requestDeathVerification(){
+  const sel = document.getElementById('activeGuardianSelect');
+  const gid = sel.value;
+  if(!gid){ alert('Select a guardian (simulate)'); return; }
+  const fileInput = document.getElementById('deathFile');
+  const file = fileInput.files && fileInput.files[0];
+  const fileName = file ? file.name : 'uploaded_document';
+  // create request entry
+  const rid = 'R' + Date.now().toString(36).substr(2,6).toUpperCase();
+  will.requests.push({id:rid, guardianId: gid, fileName, timestamp: new Date().toISOString(), status:'pending'});
+  will.status = 'death_verification_requested';
+  saveWill(will);
+  fileInput.value = '';
+  alert('Request submitted. Admin must approve.');
+}
+
+/* ---------- Admin actions ---------- */
+function adminApprove(requestId){
+  const req = will.requests.find(r=>r.id===requestId);
+  if(!req) return alert('Request not found');
+  req.status = 'approved';
+  will.status = 'death_verified';
+  // set verification token used in QR and verification page
+  will.verificationToken = 'VT-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  saveWill(will);
+  alert('Approved — will marked death_verified. Guardians can now download PDF.');
+}
+function adminReject(requestId){
+  const req = will.requests.find(r=>r.id===requestId);
+  if(!req) return alert('Request not found');
+  req.status = 'rejected';
+  // if all requests rejected, keep as draft or death_verification_requested
+  will.status = 'draft';
+  saveWill(will);
+  alert('Rejected.');
+}
+function adminApproveAll(){ will.requests.forEach(r=>r.status='approved'); will.status='death_verified'; will.verificationToken = 'VT-' + Math.random().toString(36).substr(2,8).toUpperCase(); saveWill(will); alert('All approved'); }
+function adminRejectAll(){ will.requests.forEach(r=>r.status='rejected'); will.status='draft'; saveWill(will); alert('All rejected'); }
+
+/* ---------- Preview Wasiyat (simple popup) ---------- */
+function previewWasiyat(){
+  saveDraft();
+  const lines = [
+    `Owner: ${will.ownerName} (${will.ownerCnic})`,
+    `Status: ${will.status}`,
+    '',
+    'Heirs:',
+    ...will.heirs.map(h => ` - ${h.name} : ${h.share}%`),
+    '',
+    'Assets:',
+    ...will.assets.map(a => ` - ${a.name} : PKR ${Number(a.value).toLocaleString()}`),
+    '',
+    'Guardians:',
+    ...will.guardians.map(g => ` - ${g.name} (${g.phone})`)
+  ];
+  alert(lines.join('\n'));
+}
+
+/* ---------- PDF Generation (jsPDF) ---------- */
+async function generateQRCode(payload){
+  // create a small canvas QR with token or payload
+  const canvas = await QRCode.toCanvas(JSON.stringify(payload));
+  return canvas;
+}
+
+async function downloadPDF(){
+  saveDraft(); // ensure owner fields updated
+  if(will.status !== 'death_verified'){ alert('Download locked — will not verified by admin yet.'); return; }
+
+  // build document id + verification URL (demo)
+  if(!will.verificationToken) will.verificationToken = 'VT-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  const verificationUrl = `${location.origin}${location.pathname}#verify:${will.verificationToken}`;
+
+  // prepare QR payload (token + owner + cnic)
+  const qrPayload = { token: will.verificationToken, owner: will.ownerName, cnic: will.ownerCnic, url: verificationUrl };
+  const qrCanvas = await generateQRCode(qrPayload);
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  let y = 20;
+
+  // watermark (large, translucent)
+  doc.setFontSize(60);
+  doc.setTextColor(150);
+  // set opacity via setGState (works in modern jspdf builds)
+  try{ doc.setGState(new doc.GState({opacity:0.08})); } catch(e){ /* fallback */ }
+  doc.text('AlWassi.pk', 105, 150, {align:'center', angle:45});
+  // reset opacity
+  try{ doc.setGState(new doc.GState({opacity:1})); } catch(e){}
+
+  // Header
+  doc.setFontSize(18); doc.setTextColor(20);
+  doc.setFont('helvetica','bold');
+  doc.text('ISLAMIC WILL (WASIYAT)', 105, y, {align:'center'});
+  y += 8;
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text("وصیت نامہ - In accordance with Shari'ah Law", 105, y, {align:'center'});
+  // QR image
+  if(qrCanvas){
+    const qrData = qrCanvas.toDataURL();
+    doc.addImage(qrData, 'PNG', 160, 15, 35, 35);
+    doc.setFontSize(8); doc.text(`Verify ID: ${will.verificationToken}`, 178, 53, {align:'center'});
+  }
+
+  // Owner info
+  y = 62;
+  doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text('PERSONAL INFORMATION / ذاتی معلومات', 20, y);
+  y += 7;
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text(`Name: ${will.ownerName}`, 20, y); y+=6;
+  doc.text(`CNIC: ${will.ownerCnic}`, 20, y); y+=6;
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y); y+=8;
+
+  // Declaration text (wrapped)
+  const declaration = `I, ${will.ownerName}, being of sound mind and disposing memory, do hereby declare this to be my last will and testament in accordance with Islamic law. I appoint the named guardians to execute this will after official death verification.`;
+  doc.setFontSize(11);
+  const splitDecl = doc.splitTextToSize(declaration, 170);
+  doc.text(splitDecl, 20, y);
+  y += splitDecl.length * 5 + 6;
+
+  // Estate Summary
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('ESTATE SUMMARY / جائیداد کا خلاصہ', 20, y);
+  y += 7;
+  doc.setFont('helvetica','normal'); doc.setFontSize(11);
+  // Total estate value
+  const total = will.assets.reduce((s,a)=>s + (Number(a.value)||0), 0);
+  doc.text(`Total Estate Value: PKR ${Number(total).toLocaleString()}`, 20, y);
+  y += 7;
+  will.assets.forEach(a => { doc.text(`• ${a.name} — PKR ${Number(a.value).toLocaleString()}`, 20, y); y+=6; });
+
+  y += 6;
+  doc.setFont('helvetica','bold'); doc.text('INHERITANCE DISTRIBUTION', 20, y); y+=7;
+  doc.setFont('helvetica','normal');
+  will.heirs.forEach(h => { doc.text(`• ${h.name} — ${h.share}%`, 20, y); y+=6; });
+
+  // Guardians
+  y += 6;
+  doc.setFont('helvetica','bold'); doc.text('ASSIGNED GUARDIANS (WAKEEL)', 20, y); y+=7;
+  doc.setFont('helvetica','normal');
+  will.guardians.forEach((g,i) => { doc.text(`${i+1}. ${g.name} — ${g.phone}`, 20, y); y+=6; });
+
+  // Signature placeholder (visible e-signature)
+  y += 12;
+  doc.setFont('helvetica','bold'); doc.text('DIGITAL SIGNATURE', 20, y);
+  // placeholder signature (you can replace with actual dataURL)
+  const signaturePlaceholder = 'https://via.placeholder.com/220x60.png?text=Signature';
+  // Add signature image (keep width 60mm)
+  try {
+    doc.addImage(signaturePlaceholder, 'PNG', 20, y+6, 60, 18);
+  } catch(e){
+    // ignore if load fails
+  }
+
+  // Footer: verification URL text
+  doc.setFontSize(9); doc.setFont('helvetica','italic');
+  doc.text(`Verify at: ${verificationUrl}`, 20, 285);
+
+  // Save PDF (filename contains owner & token)
+  const fileName = `Wasiyat_${will.ownerName.replace(/\s+/g,'_')}_${will.verificationToken || 'NOID'}.pdf`;
+  doc.save(fileName);
+
+  // update verification token visible in UI
+  will.verificationToken = will.verificationToken || ('VT-' + Math.random().toString(36).substr(2,8).toUpperCase());
+  saveWill(will);
+  alert('PDF generated and downloaded. Share with guardians as needed.');
+}
+
+/* ---------- Init ---------- */
+function scrollToSection(id){
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function removeAllKeys(){ localStorage.removeItem(STORAGE_KEY); will = loadWill(); renderAll(); }
+renderAll();
+
+</script>
+</body>
+</html>
